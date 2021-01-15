@@ -20,7 +20,7 @@ service.interceptors.request.use(
     // Do something before request is sent
     if (store.getters.token) {
       // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
-      config.headers['X-Token'] = getToken()
+      config.headers['token'] = getToken()
     }
     if (debug) {
       console.log(config)
@@ -45,9 +45,6 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-    // if (debug) {
-    //   console.log(res)
-    // }
     // 服务器错误
     if (res.code === 20001) {
       Message({
@@ -66,7 +63,7 @@ service.interceptors.response.use(
       })
       return Promise.reject('error')
     }
-    // 数据存在
+    // 数据不存在
     if (res.code === 40000) {
       Message({
         message: res.msg,
@@ -74,6 +71,36 @@ service.interceptors.response.use(
         duration: 5 * 1000
       })
       return Promise.reject('error')
+    }
+    // 认证失败
+    if (res.code === 20003) {
+      Message({
+        message: res.msg,
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject('error')
+    }
+    // 数据为空
+    if (res.code === 20004) {
+      Message({
+        message: res.msg,
+        type: 'warning',
+        duration: 5 * 1000
+      })
+      return response.data
+    }
+    // 验证错误
+    if (res.code === 20002) {
+      MessageBox.confirm('你已被登出，是否重新登录？', '提示', {
+        confirmButtonText: '重新登录',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        store.dispatch('FedLogOut').then(() => {
+          location.reload() // 为了重新实例化vue-router对象 避免bug
+        })
+      })
     }
     // 20003:Token过期 或 未登录
     else if (res.code === 20003) {

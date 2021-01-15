@@ -8,7 +8,7 @@ export function loginByUsername(username, password, openId, accessToken) {
     accessToken
   }
   return request({
-    url: '/system-user/user-login',
+    url: '/codeworld-auth/system-login',
     method: 'post',
     data
   })
@@ -25,15 +25,15 @@ export function loginByUsername(username, password, openId, accessToken) {
 
 export function logout(token) {
   return request({
-    url: '/logout',
-    method: 'get',
-    // data: token
+    url: '/codeworld-user/user-login-out',
+    method: 'post',
+    data: {token}
   })
 }
 
 export function getUserInfo(token) {
   return request({
-    url: '/system-user/get-user-info',
+    url: '/codeworld-auth/get-system-login-info',
     method: 'post',
     data: {token}
   })

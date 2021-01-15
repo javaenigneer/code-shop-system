@@ -128,8 +128,6 @@ const user = {
             reject('Verification failed, please login again.')
           }
           const data = response.data
-
-
           if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
             commit('SET_ROLES', data.roles)
           } else {
@@ -150,7 +148,7 @@ const user = {
 
           commit('SET_USER', data)
           commit('SET_ID', data.id)
-          commit('SET_NAME', data.username)
+          commit('SET_NAME', data.userName)
           commit('SET_AVATAR', data.avatar)
           commit('SET_INTRODUCTION', data.nickName)
 
@@ -214,7 +212,7 @@ const user = {
           commit('SET_BUTTONS', data.buttons)
 
           commit('SET_ID', data.id)
-          commit('SET_NAME', data.name)
+          commit('SET_NAME', data.userName)
           commit('SET_AVATAR', data.avatar)
           commit('SET_INTRODUCTION', data.introduction)
           dispatch('GenerateRoutes', data.menus) // 动态修改权限后 重绘侧边菜单

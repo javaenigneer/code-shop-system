@@ -2,14 +2,14 @@ import request from '@/utils/request';
 
 export function treeMenu() {
   return request({
-    url: '/system-menu/tree-menu',
+    url: '/codeworld-system/menu/tree-menu',
     method: 'post'
   })
 }
 
 export function createMenu(form) {
   return request({
-    url: '/system-menu/add-menu',
+    url: '/codeworld-system/menu/add-menu',
     method: 'post',
     data: form
   })
@@ -17,7 +17,7 @@ export function createMenu(form) {
 
 export function updateMenu(form) {
   return request({
-    url: '/system-menu/update-menu',
+    url: '/codeworld-system/menu/update-menu',
     method: 'post',
     data: form
   })
@@ -25,7 +25,7 @@ export function updateMenu(form) {
 
 export function deleteMenu(id) {
   return request({
-    url: '/system-menu/delete-menu',
+    url: '/codeworld-system/menu/delete-menu',
     method: 'post',
     params: {id}
   });

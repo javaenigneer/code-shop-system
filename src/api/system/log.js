@@ -18,9 +18,9 @@ export function saveOrUpdateLog(form) {
 
 export function deleteLog(id) {
   return request({
-    url: '/api/system/log/delete',
+    url: '/system-log/delete-log',
     method: 'post',
-    data: { 'id': id }
+    params: { id }
   })
 }
 

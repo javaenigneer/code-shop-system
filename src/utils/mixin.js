@@ -13,6 +13,17 @@ export default {
         }
       })
     },
+    submitWarning(msg, cb) {
+      this.$notify({
+        title: '警告',
+        message: msg,
+        type: 'warning',
+        duration: 2000,
+        onClose: function() {
+          cb && cb()
+        }
+      })
+    },
     // 操作失败消息提醒内容
     submitFail(msg) {
       this.$message({

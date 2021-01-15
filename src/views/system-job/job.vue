@@ -2,14 +2,14 @@
   <div class="app-container">
     <cus-wraper>
       <cus-filter-wraper>
-        <el-input v-model="listQuery.userName" placeholder="请输入用户名" style="width:150px" clearable></el-input>
-        <el-input v-model="listQuery.userEmail" placeholder="请输入用户邮箱" style="width:150px" clearable></el-input>
-        <el-input v-model="listQuery.userPhone" placeholder="请输入用户手机" style="width:150px" clearable></el-input>
+        <el-input v-model="listQuery.beanName" placeholder="任务名称" style="width:150px" clearable></el-input>
+        <el-input v-model="listQuery.methodName" placeholder="参数名称" style="width:150px" clearable></el-input>
          <el-select
-              v-model="listQuery.userStatus"
+              v-model="listQuery.status"
               class="filter-item"
               placeholder="请选择状态"
               style="width: 280px;"
+              clearable
             >
               <el-option
                 v-for="item in flagList"
@@ -63,20 +63,8 @@
           <el-table-column label="参数" prop="params" align="center"></el-table-column>
           <el-table-column label="cron表达式" prop="cronExpression" align="center"></el-table-column>
           <el-table-column label="备注" prop="remark" align="center"></el-table-column>
-          <!-- <el-table-column label="性别" prop="sex" align="center">
-            <template slot-scope="scope">
-              <span>{{ scope.row.sex==0 ? '男':'女' }}</span>
-            </template>
-          </el-table-column>-->
           <el-table-column label="加入时间" prop="createTime" align="center"></el-table-column>
           <el-table-column label="修改时间" prop="updateTime" align="center"></el-table-column>
-          <!-- <el-table-column label="头像" prop="avatar" align="center">
-            <template slot-scope="scope">
-              <span>
-                <img :src="scope.row.avatar" alt="" style="width: 50px;height: 50px">
-              </span>
-            </template>
-          </el-table-column>-->
           <el-table-column label="状态" prop="userStatus" align="center">
             <template slot-scope="scope">
               <el-tag
@@ -169,38 +157,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <!-- <el-form-item label="性别:" prop="sex">
-            <el-select v-model="form.sex" class="filter-item" placeholder='请选择' style="width: 280px;">
-              <el-option v-for="item in sexList" :key="item.key" :label="item.display_name"
-                         :value="item.key"></el-option>
-            </el-select>
-          </el-form-item>-->
-          <!-- <el-form-item label="手机号码:" prop="phone">
-            <el-input v-model="form.phone"></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱:" prop="email">
-            <el-input v-model="form.email"></el-input>
-          </el-form-item>
-          <el-form-item label="头像:" prop="avatar">
-            <span>
-              <img :src="form.avatar" alt="" style="width: 50px;height: 50px">
-            </span>
-          </el-form-item>-->
-<!--          <el-form-item label="用户状态:" prop="userStatus">-->
-<!--            <el-select-->
-<!--              v-model="form.userStatus"-->
-<!--              class="filter-item"-->
-<!--              placeholder="请选择"-->
-<!--              style="width: 280px;"-->
-<!--            >-->
-<!--              <el-option-->
-<!--                v-for="item in flagList"-->
-<!--                :key="item.key"-->
-<!--                :label="item.display_name"-->
-<!--                :value="item.key"-->
-<!--              ></el-option>-->
-<!--            </el-select>-->
-<!--          </el-form-item>-->
+
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">{{ $t('table.cancel') }}</el-button>
@@ -277,10 +234,6 @@ export default {
         userName: undefined, //用户名
         userEmail: undefined, //用户邮箱
         userPhone: undefined, //用户手机
-        // sex: undefined, //性别 0:男 1:女
-        // phone: undefined, //手机号码
-        // email: undefined, //邮箱
-        // avatar: undefined, //头像
         status: undefined, //状态
         // gmtCreate: undefined, //创建时间
         // gmtModified: undefined //更新时间
@@ -297,15 +250,7 @@ export default {
         params: [{ required: true, message: "请输入参数", trigger: "blur" }],
         cronExpression: [{ required: true, message: "请输入Cron表达式", trigger: "blur" }],
         remark: [{ required: true, message: "请输入备注", trigger: "blur" }],
-        // pwd: [
-        //   { pattern: /^(\w){6,16}$/, message: "请设置6-16位字母、数字组合" },
-        // ],
-        // nickName: [
-        //   { required: true, message: "请输入你昵称", trigger: "blur" },
-        // ],
-        // flag: [{ required: true, message: "请选择状态", trigger: "blur" }],
       },
-      roleList:[]
     };
   },
   created() {
@@ -320,16 +265,8 @@ export default {
         this.listLoading = false;
       });
     },
-    // 获取全部角色
-    getRoleList(){
-      getAllListNoParam().then((response) => {
-        this.roleList = response.data
-      });
-    },
     handleCreate() {
       this.active = false
-      this.getRoleList();
-      this.resetForm();
       this.dialogStatus = "create";
       this.dialogVisible = true;
     },
@@ -399,38 +336,6 @@ export default {
           this.submitFail(response.msg);
         }
       });
-    },
-    // submitForm() {
-    //   this.$refs.dataForm.validate(valid => {
-    //     if (valid) {
-    //       saveSysUser(this.form).then(response => {
-    //         if (response.code == 200) {
-    //           this.getList()
-    //           this.submitOk(response.message)
-    //           this.dialogVisible = false
-    //         } else {
-    //           this.submitFail(response.message)
-    //         }
-    //       }).catch(err => {
-    //         console.log(err)
-    //       })
-    //     }
-    //   })
-    // },
-    resetForm() {
-      this.form = {
-        id: undefined, //主键ID
-        username: undefined, //账号
-        pwd: undefined, //登录密码
-        nickName: undefined, //昵称
-        sex: undefined, //性别 0:男 1:女
-        phone: undefined, //手机号码
-        email: undefined, //邮箱
-        avatar: undefined, //头像
-        flag: undefined, //状态
-        // gmtCreate: undefined, //创建时间
-        // gmtModified: undefined //更新时间
-      };
     },
     // 监听dialog关闭时的处理事件
     handleDialogClose() {

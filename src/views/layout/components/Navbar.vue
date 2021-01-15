@@ -82,6 +82,7 @@ import SizeSelect from '@/components/SizeSelect'
 import LangSelect from '@/components/LangSelect'
 import ThemePicker from '@/components/ThemePicker'
 import Search from '@/components/HeaderSearch'
+import {logout} from '@/api/login'
 
 export default {
   components: {
@@ -108,10 +109,16 @@ export default {
       this.$store.dispatch('toggleSideBar')
     },
     logout() {
+      // this.$store.dispatch('LogOut');
+      // this.$router.push('/login?redirect=${this.$router.fullPath}')
       this.$store.dispatch('LogOut').then(() => {
         this.$router.push({path: '/dashboard'});
         location.reload()// In order to re-instantiate the vue-router object to avoid bugs
       })
+      // logout("111").then(response => {
+      //   console.log(response.data);
+      // })
+      // console.log("退出")
     }
   }
 }

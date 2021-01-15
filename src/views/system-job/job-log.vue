@@ -134,7 +134,7 @@
 </template>
 
 <script>
-  import { getJobLogPage, saveOrUpdateLog, deleteLog } from '@/api/job/job-log'
+  import { getJobLogPage, saveOrUpdateLog, deleteJobLog } from '@/api/job/job-log'
 
   export default {
     name: 'Log',
@@ -225,13 +225,13 @@
         this.dialogVisible = true
       },
       handleDelete(row) {
-        let id = row.id
-        deleteLog(id).then(response => {
-          if (response.code === 200) {
+        let id = row.jobLogId
+        deleteJobLog(id).then(response => {
+          if (response.code === 20000) {
             this.getList()
-            this.submitOk(response.message)
+            this.submitOk(response.msg)
           } else {
-            this.submitFail(response.message)
+            this.submitFail(response.msg)
           }
         })
       },

@@ -75,7 +75,7 @@ export default {
     size: '布局大小'
   },
   login: {
-    title: '系统登录',
+    title: '多商户系统登录',
     logIn: '登录',
     username: '账号',
     password: '密码',
@@ -136,7 +136,17 @@ export default {
     cancel: '取 消',
     confirm: '确 定',
     enable: '启用',
-    disable: '停用'
+    disable: '停用',
+    offline: '下线',
+    onSale: '上架',
+    offSale: '下架',
+    set:'设置',
+    setAttribute: '属性',
+    setParam:'参数',
+    importGoods: '导入到索引库',
+    examine: '审核',
+    viewOrder:'查看订单',
+    orderDelivery:'订单发货'
   },
   errorLog: {
     tips: '请点击右上角bug小图标',

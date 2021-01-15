@@ -46,7 +46,7 @@
       </el-col>
     </el-row>
 
-    <el-button v-has="'sys:user:editPersonalInfo'" type="primary" @click="handleUpdate()" icon="el-icon-edit" plain>
+    <el-button  type="primary" @click="handleUpdate()" icon="el-icon-edit" plain>
       修改个人信息
     </el-button>
 

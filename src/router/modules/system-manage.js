@@ -27,29 +27,22 @@ const systemManage = {
       meta: { title: '角色管理', icon: 'my-role', noCache: true, resources: 'role' }
     },
     {
-      path: 'roleSetting/:id(\\d+)',
-      component: () => import('@/views/system-manage/roleSetting'),
-      name: '权限设置',
-      meta: { title: '权限设置', icon: 'my-role', noCache: true, resources: 'roleSetting' },
-      hidden: true
-    },
-    {
       path: 'menu',
       component: () => import('@/views/system-manage/menu'),
       name: '菜单管理',
       meta: { title: '菜单管理', icon: 'my-sysmenu', noCache: true, resources: 'menu' }
     },
     {
+      path: 'dept',
+      component: () => import('@/views/system-manage/dept'),
+      name: '部门管理',
+      meta: { title: '部门管理', icon: 'my-sysmenu', noCache: true, resources: 'dept' }
+    },
+    {
       path: 'log',
       component: () => import('@/views/system-manage/log'),
       name: '系统日志',
       meta: { title: '系统日志', icon: 'my-sysmenu', noCache: true, resources: 'log' }
-    },
-    {
-      path: 'chat',
-      component: () => import('@/views/system-manage/chat'),
-      name: '聊天室',
-      meta: { title: '聊天室', icon: 'my-sysmenu', noCache: true, resources: 'chat' }
     }
   ]
 };

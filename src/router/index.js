@@ -16,6 +16,11 @@ import Layout from '@/views/layout/Layout'
 // 系统管理
 import systemManage from "./modules/system-manage";
 import systemJob from './modules/system-job';
+import systemMonitor from './modules/system-monitor';
+import systemGoods from './modules/system-goods';
+import systemMerchant from './modules/system-merchant'
+import systemOrder from './modules/system-order'
+import systemMarketing from './modules/system-marketing'
 
 
 /** note: Submenu only appear when children.length>=1
@@ -414,6 +419,9 @@ export const asyncRoutes = [
   // },
 
   systemManage,
-  systemJob,
+  systemGoods,
+  systemMerchant,
+  systemOrder,
+  systemMarketing,
   { path: '*', redirect: '/404', hidden: true }
 ]

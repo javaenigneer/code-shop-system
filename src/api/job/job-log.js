@@ -16,11 +16,11 @@ export function saveOrUpdateLog(form) {
   })
 }
 
-export function deleteLog(id) {
+export function deleteJobLog(id) {
   return request({
-    url: '/api/system/log/delete',
+    url: '/system-job-log/delete-job-log',
     method: 'post',
-    data: { 'id': id }
+    params: { id }
   })
 }
 
