@@ -25,10 +25,18 @@
             label="买家名称"
             width="180">
           </el-table-column>
-            <el-table-column
-              prop="orderStatus"
-              label="状态">
-            </el-table-column>
+          <el-table-column
+            prop="orderStatus"
+            label="状态">
+          </el-table-column>
+          <el-table-column
+            prop="orderDeliveryCompany"
+            label="物流公司">
+          </el-table-column>
+          <el-table-column
+            prop="orderDeliveryNumber"
+            label="物流单号">
+          </el-table-column>
         </el-table>
       </template>
     </el-card>
@@ -94,7 +102,7 @@
             prop="address"
             label="小计">
             <template slot-scope="scope">
-             {{scope.row.productCount * scope.row.productSkuModel.price}}
+              {{scope.row.productCount * scope.row.productSkuModel.price}}
             </template>
           </el-table-column>
         </el-table>
@@ -173,9 +181,9 @@
         deptTreeList: [],
         total: 0,
         orderBasic: [],
-        receiver:[],
-        productDetail:[],
-        orderStatus:''
+        receiver: [],
+        productDetail: [],
+        orderStatus: ''
       }
     },
     created() {
@@ -192,6 +200,8 @@
             orderBasicParam.orderId = orderDetail.orderId
             orderBasicParam.buyerName = orderDetail.buyerName
             orderBasicParam.orderStatus = this.checkOrderStatus(orderDetail.orderStatus)
+            orderBasicParam.orderDeliveryCompany = orderDetail.orderDeliveryCompany
+            orderBasicParam.orderDeliveryNumber = orderDetail.orderDeliveryNumber
             this.orderBasic.push(orderBasicParam)
 
             let receiverParam = {}
@@ -206,13 +216,18 @@
           }
         })
       },
-      checkOrderStatus(orderStatus){
+      checkOrderStatus(orderStatus) {
         switch (orderStatus) {
-          case 1: return '未支付'
-          case 2: return "已支付，未发货"
-          case 3: return "已发货"
-          case 4: return "已完成"
-          case 5: return "已关闭"
+          case 1:
+            return '未支付'
+          case 2:
+            return '已支付，未发货'
+          case 3:
+            return '已发货'
+          case 4:
+            return '已完成'
+          case 5:
+            return '已关闭'
         }
       }
     }

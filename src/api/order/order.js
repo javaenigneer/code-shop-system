@@ -16,19 +16,19 @@ export function getOrderInfoById(orderId) {
   });
 }
 
-export function updatePersonalInfo(form) {
+export function getReceiverAddressById(addressId) {
   return request({
-    url: '/api/system/user/updatePersonalInfo',
+    url: '/codeworld-member/address/get-receiver-address-id',
     method: 'post',
-    data: form
+    params: {addressId}
   });
 }
-
-export function getUserByDeptId(deptId) {
+// 订单发货
+export function orderDelivery(orderDeliveryMessage) {
   return request({
-    url: '/codeworld-system/user/get-user-dept-id',
+    url: '/codeworld-order/order-delivery',
     method: 'post',
-    params: {deptId}
+    data: orderDeliveryMessage
   });
 }
 

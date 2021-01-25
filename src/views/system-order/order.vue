@@ -53,7 +53,7 @@
           <el-table-column label="状态" prop="orderStatus" align="center">
             <template slot-scope="scope">
               <el-tag v-if="scope.row.orderStatus == 1"
-                      type="success"
+                      type="danger"
                       hit
               >未支付
               </el-tag>
@@ -62,7 +62,7 @@
               >未发货
               </el-tag>
               <el-tag v-if="scope.row.orderStatus == 3"
-                      type="danger"
+                      type="success"
                       hit
               >已发货
               </el-tag>
@@ -91,7 +91,7 @@
                 v-has="'order:delivery'"
                 size="mini"
                 type="success"
-                @click="viewOrder(scope.row)"
+                @click="orderDeliveryPage(scope.row)"
               >{{ $t('table.orderDelivery') }}
               </el-button>
               <cus-del-btn v-has="'order:delete'" @ok="handleDelete(scope.row)"/>
@@ -107,6 +107,57 @@
           @pagination="getList"
         />
       </div>
+
+      <!-- 订单发货列表 -->
+      <el-dialog
+        title="订单发货"
+        :visible.sync="dialogVisible"
+        width="40%"
+        @close="handleDialogClose"
+        :before-close="handleClose"
+      >
+        <el-form
+          ref="dataForm"
+          :model="orderDeliveryList"
+          label-width="80px"
+          class="demo-ruleForm"
+        >
+          <el-form-item label="订单编号:">
+            <el-input v-model="orderDeliveryList.orderId" :disabled="active"></el-input>
+          </el-form-item>
+          <el-form-item label="收货人:">
+            <el-input v-model="orderDeliveryList.receiverName" :disabled="active"></el-input>
+          </el-form-item>
+          <el-form-item label="手机号码:">
+            <el-input v-model="orderDeliveryList.receiverPhone" :disabled="active"></el-input>
+          </el-form-item>
+          <el-form-item label="收货地址:">
+            <el-input v-model="orderDeliveryList.receiverAddress" :disabled="active"></el-input>
+          </el-form-item>
+          <el-form-item label="物流公司:">
+            <el-select
+              v-model="orderDeliveryList.logisticsCompany"
+              class="filter-item"
+              placeholder="请选择"
+              style="width: 280px;"
+            >
+              <el-option
+                v-for="item in logisticsCompany"
+                :key="item.key"
+                :label="item.display_name"
+                :value="item.key"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">{{ $t('table.cancel') }}</el-button>
+          <el-button
+            type="primary"
+            @click="orderDelivery"
+          >{{ $t('table.confirm') }}</el-button>
+        </span>
+      </el-dialog>
     </cus-wraper>
   </div>
 </template>
@@ -114,8 +165,9 @@
 <script>
   import {
     getSystemPageOrder,
+    getReceiverAddressById,
+    orderDelivery
   } from '@/api/order/order'
-  import { treeDept } from '@/api/system/dept'
 
   export default {
     data() {
@@ -129,29 +181,31 @@
         }],
         value: '',
         centerDialogVisible: false,
-        active: false,
+        active: true,
         dialogVisible: false,
         list: [],
-        sexList: [
-          { key: '0', display_name: '男' },
-          { key: '1', display_name: '女' }
-        ],
         flagList: [
           { key: 1, display_name: '未付款' },
           { key: 2, display_name: '未发货' },
           { key: 3, display_name: '已发货' },
           { key: 4, display_name: '已完成' },
-          { key: 5, display_name: '已关闭' },
+          { key: 5, display_name: '已关闭' }
+        ],
+        logisticsCompany: [
+          { key: 1, display_name: '圆通' },
+          { key: 2, display_name: '中通' },
+          { key: 3, display_name: '韵达' },
+          { key: 4, display_name: '申通' },
+          { key: 5, display_name: '邮政' }
         ],
         listLoading: true,
-        deptTreeList: [],
         total: 0,
         listQuery: {
           page: 1,
           limit: 10,
           orderId: undefined,
           orderStatus: undefined,
-          createTime: undefined,
+          createTime: undefined
         },
         pickerOptions: {
           shortcuts: [{
@@ -176,60 +230,22 @@
           }]
         },
         input: '',
-        form: {
-          userId: undefined, //主键ID
-          userName: undefined, //用户名
-          userEmail: undefined, //用户邮箱
-          userPhone: undefined, //用户手机
-          // sex: undefined, //性别 0:男 1:女
-          // phone: undefined, //手机号码
-          // email: undefined, //邮箱
-          // avatar: undefined, //头像
-          userStatus: undefined, //状态
-          // gmtCreate: undefined, //创建时间
-          // gmtModified: undefined //更新时间
-          roleType: undefined, // 角色名称
-          deptIds: undefined
-        },
         dialogStatus: '',
         titleMap: {
           update: '编辑',
           create: '创建'
         },
-        rules: {
-          userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-          userEmail: [{ required: true, message: '请输入用户邮箱', trigger: 'blur' }],
-          userPhone: [{ required: true, message: '请输入手机号码', trigger: 'blur' }]
-          // pwd: [
-          //   { pattern: /^(\w){6,16}$/, message: "请设置6-16位字母、数字组合" },
-          // ],
-          // nickName: [
-          //   { required: true, message: "请输入你昵称", trigger: "blur" },
-          // ],
-          // flag: [{ required: true, message: "请选择状态", trigger: "blur" }],
-        },
-        roleList: [],
-        defaultPropsMenu: {
-          children: 'children',
-          label: 'title'
-        },
-        defaultCheckedKeysMenu: [],
-        deptIdCheckId: [],
-        merchantDetail: {
-          number: '',
-          merchantName: '',
-          idCardFront: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          idCardBack: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          license: '',
-          type: '',
-          status: '',
-          currentStatus: ''
+        orderDeliveryList: {
+          orderId: undefined,
+          receiverName: undefined,
+          receiverPhone: undefined,
+          receiverAddress: undefined,
+          logisticsCompany: undefined
         }
       }
     },
     created() {
       this.getList()
-      this.deptTree()
     },
     methods: {
       getList() {
@@ -240,172 +256,52 @@
           this.listLoading = false
         })
       },
-      // 获取全部角色
-      getRoleList() {
-        getAllListNoParam().then((response) => {
-          this.roleList = response.data
-        })
-      },
-      handleCreate() {
-        this.defaultCheckedKeysMenu = []
-        this.active = false
-        this.getRoleList()
-        this.resetForm()
-        this.dialogStatus = 'create'
-        this.dialogVisible = true
-        this.deptTree()
-      },
-      createUser() {
-        var selectedIds = this.$refs.menuTree.getCheckedKeys()
-        if (selectedIds.length >= 2 || selectedIds.length <= 0) {
-          this.submitWarning('请选择一个部门')
-          return
-        }
-        this.form.deptIds = selectedIds[0]
-        this.$refs.dataForm.validate(valid => {
-          if (valid) {
-            addUser(this.form).then(response => {
-              if (response.code == 20000) {
-                this.getList()
-                this.submitOk(response.msg)
-                this.dialogVisible = false
-              } else {
-                this.submitFail(response.msg)
-              }
-            }).catch(err => {
-              console.log(err)
-            })
-          }
-        })
-      },
-      handleUpdate(row) {
-        this.defaultCheckedKeysMenu = []
-        this.active = true
-        this.getRoleList()
-        this.deptTree()
-        this.form = Object.assign({}, row)
-        getDeptIdByUserId(row.userId).then(response => {
-          if (response.data && response.data.length > 0) {
-            this.defaultCheckedKeysMenu = this._.map(response.data, 'deptId')
-          }
-        })
-        this.$delete(this.form, 'createTime')
-        this.$delete(this.form, 'updateTime')
-        this.$delete(this.form, 'userRole')
-        this.$delete(this.form, 'userDept')
-        this.dialogStatus = 'update'
-        this.dialogVisible = true
-      },
-      updateUser() {
-        var selectedIds = this.$refs.menuTree.getCheckedKeys()
-        if (selectedIds.length >= 2 || selectedIds.length <= 0) {
-          this.submitWarning('请选择一个部门')
-          return
-        }
-        this.form.deptIds = selectedIds[0]
-        this.$refs.dataForm.validate((valid) => {
-          if (valid) {
-            updateSysUser(this.form)
-              .then((response) => {
-                if (response.code == 20000) {
-                  this.getList()
-                  this.submitOk(response.msg)
-                  this.dialogVisible = false
-                } else {
-                  this.submitFail(response.msg)
-                }
-              })
-              .catch((err) => {
-                console.log(err)
-              })
-          }
-        })
-      },
-      goExamineMerchant(row) {
-        this.centerDialogVisible = true
-        Object.assign(this.merchantDetail, row)
-      },
-      examineMerchant() {
-        var param = {}
-        param.number = this.merchantDetail.number
-        param.status = this.merchantDetail.currentStatus
-        examineMerchant(param).then(response => {
-          if (response.code === 20000) {
-            this.getList()
-            this.submitOk(response.msg)
-            this.centerDialogVisible = false
-          } else {
-            this.submitFail(response.msg)
-          }
-        })
-      },
-      handleDelete(row) {
-        let userId = row.userId
-        deleteSysUser(userId).then((response) => {
-          if (response.code == 20000) {
-            this.getList()
-            this.submitOk(response.msg)
-          } else {
-            this.submitFail(response.msg)
-          }
-        })
-      },
-
-      deptTree() {
-        treeDept().then(response => {
-          this.deptTreeList = response.data.deptTree
-        })
-      },
-
-      getDeptIdByUserId(userId) {
-        getDeptIdByUserId(userId).then(response => {
-          if (response.code === 20000) {
-            this.deptIdCheckId = response.data
-          } else {
-            this.deptIdCheckId = null
-          }
-        })
-      },
-      // submitForm() {
-      //   this.$refs.dataForm.validate(valid => {
-      //     if (valid) {
-      //       saveSysUser(this.form).then(response => {
-      //         if (response.code == 200) {
-      //           this.getList()
-      //           this.submitOk(response.message)
-      //           this.dialogVisible = false
-      //         } else {
-      //           this.submitFail(response.message)
-      //         }
-      //       }).catch(err => {
-      //         console.log(err)
-      //       })
-      //     }
-      //   })
-      // },
-      resetForm() {
-        this.form = {
-          id: undefined, //主键ID
-          username: undefined, //账号
-          pwd: undefined, //登录密码
-          nickName: undefined, //昵称
-          sex: undefined, //性别 0:男 1:女
-          phone: undefined, //手机号码
-          email: undefined, //邮箱
-          avatar: undefined, //头像
-          flag: undefined //状态
-          // gmtCreate: undefined, //创建时间
-          // gmtModified: undefined //更新时间
-        }
-      },
       // 监听dialog关闭时的处理事件
       handleDialogClose() {
         if (this.$refs['dataForm']) {
           this.$refs['dataForm'].clearValidate() // 清除整个表单的校验
         }
       },
-      viewOrder(row){
-        this.$router.push({path:'/systemOrder/order-detail',query:{orderId:row.orderId}})
+      viewOrder(row) {
+        this.$router.push({ path: '/systemOrder/order-detail', query: { orderId: row.orderId } })
+      },
+      // 订单发货列表
+      orderDeliveryPage(row) {
+        // 根据地址id查询地址信息
+        getReceiverAddressById(row.addressId).then((response) => {
+          if (response.code === 20000) {
+            this.orderDeliveryList.orderId = row.orderId
+            this.orderDeliveryList.receiverName = response.data.name
+            this.orderDeliveryList.receiverPhone = response.data.phone
+            this.orderDeliveryList.receiverAddress = response.data.area + response.data.detailed + response.data.houseNumber
+            this.dialogVisible = true
+          } else {
+            this.submitFail(response.msg)
+          }
+        })
+      },
+      // 订单发货
+      orderDelivery() {
+        let orderDeliveryMessage = {}
+        orderDeliveryMessage.orderId = this.orderDeliveryList.orderId
+        orderDeliveryMessage.logisticsCompany = this.orderDeliveryList.logisticsCompany
+        orderDelivery(orderDeliveryMessage).then((response) => {
+          if (response.code === 20000){
+            this.getList();
+            this.submitOk(response.msg);
+            this.dialogVisible = false
+          }else {
+            this.submitFail(response.msg)
+          }
+        })
+      },
+      handleClose(done) {
+        this.$confirm('确认关闭？')
+          .then(_ => {
+            done()
+          })
+          .catch(_ => {
+          })
       }
     }
   }
