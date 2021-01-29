@@ -33,6 +33,7 @@
           :picker-options="pickerOptions">
         </el-date-picker>
         <el-button type="primary" @click="getList" icon="el-icon-search">查询</el-button>
+        <el-button type="primary" @click="toAddMerchant" icon="el-icon-circle-plus-outline">添加商户</el-button>
       </cus-filter-wraper>
       <div class="table-container">
         <el-table

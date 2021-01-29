@@ -55,20 +55,9 @@
             <el-table-column label="用户邮箱" prop="userEmail" align="center"></el-table-column>
             <el-table-column label="用户手机" prop="userPhone" align="center"></el-table-column>
             <el-table-column label="用户部门" prop="deptName" align="center"></el-table-column>
-            <!-- <el-table-column label="性别" prop="sex" align="center">
-              <template slot-scope="scope">
-                <span>{{ scope.row.sex==0 ? '男':'女' }}</span>
-              </template>
-            </el-table-column>-->
+            <el-table-column label="用户区域" prop="areaName" align="center"></el-table-column>
             <el-table-column label="加入时间" prop="createTime" align="center"></el-table-column>
             <el-table-column label="修改时间" prop="updateTime" align="center"></el-table-column>
-            <!-- <el-table-column label="头像" prop="avatar" align="center">
-              <template slot-scope="scope">
-                <span>
-                  <img :src="scope.row.avatar" alt="" style="width: 50px;height: 50px">
-                </span>
-              </template>
-            </el-table-column>-->
             <el-table-column label="状态" prop="userStatus" align="center">
               <template slot-scope="scope">
                 <el-tag
@@ -95,7 +84,7 @@
           :label="tempDesc.parentName"
           prop="parentName"
         >
-          <el-input v-model="form.parentName" :placeholder="'请输入' + tempDesc.parentName" disabled/>
+          <el-input v-model="form.parentName" :placeholder="'不填则代表顶级部门' + tempDesc.parentName"/>
         </el-form-item>
         <el-form-item :label="tempDesc.title" prop="title">
           <el-input v-model="form.title" :placeholder="'请输入' + tempDesc.title"/>

@@ -72,11 +72,10 @@ export function deleteSysUser(userId) {
   });
 }
 
-export function getSysUserById(id) {
+export function treeArea() {
   return request({
-    url: '/api/system/user/getById',
-    method: 'post',
-    data: {'id': id}
+    url: '/codeworld-system/area/tree-area',
+    method: 'get'
   });
 }
 // 获取全部角色无参数

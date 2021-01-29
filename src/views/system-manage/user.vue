@@ -18,6 +18,12 @@
             :value="item.key"
           ></el-option>
         </el-select>
+        <el-cascader
+          ref="cascaderArea"
+          v-model="listQuery.areaId"
+          :options="areaList"
+          placeholder="请选择区域"
+          :props="{value:'id',label:'name',emitPath:false}"></el-cascader>
         <el-date-picker
           v-model="listQuery.createTime"
           type="datetime"
@@ -53,27 +59,15 @@
           border
           highlight-current-row
           align="center"
-
         >
-          <el-table-column fixed label="用户名" prop="userName" align="center"></el-table-column>
+          <el-table-column fixed="left" label="用户名" prop="userName" align="center"></el-table-column>
           <el-table-column label="用户邮箱" prop="userEmail" align="center"></el-table-column>
           <el-table-column label="用户手机" prop="userPhone" align="center"></el-table-column>
           <el-table-column label="用户类型" prop="userRole" align="center"></el-table-column>
           <el-table-column label="用户部门" prop="userDept" align="center"></el-table-column>
-          <!-- <el-table-column label="性别" prop="sex" align="center">
-            <template slot-scope="scope">
-              <span>{{ scope.row.sex==0 ? '男':'女' }}</span>
-            </template>
-          </el-table-column>-->
+          <el-table-column label="用户区域" prop="userArea" align="center"></el-table-column>
           <el-table-column label="加入时间" prop="createTime" align="center"></el-table-column>
           <el-table-column label="修改时间" prop="updateTime" align="center"></el-table-column>
-          <!-- <el-table-column label="头像" prop="avatar" align="center">
-            <template slot-scope="scope">
-              <span>
-                <img :src="scope.row.avatar" alt="" style="width: 50px;height: 50px">
-              </span>
-            </template>
-          </el-table-column>-->
           <el-table-column label="状态" prop="userStatus" align="center">
             <template slot-scope="scope">
               <el-tag
@@ -85,6 +79,7 @@
           </el-table-column>
           <el-table-column
             align="center"
+            width="200px"
             v-if="this.global_checkBtnPermission(['user:edit','user:delete','user:enable'])"
             :label="$t('table.actions')"
           >
@@ -129,18 +124,17 @@
       <el-dialog
         :title="titleMap[dialogStatus]"
         :visible.sync="dialogVisible"
-        width="40%"
+        width="60%"
         @close="handleDialogClose"
       >
         <el-form
           ref="dataForm"
           :model="form"
           :rules="rules"
-          label-width="80px"
+          label-width="100px"
           class="demo-ruleForm"
         >
           <el-form-item label="用户名:" prop="userName">
-            <!--            <el-input v-model="form.username" :disabled="dialogStatus!='create'"></el-input>-->
             <el-input v-model="form.userName" :disabled="active"></el-input>
           </el-form-item>
           <el-form-item label="用户邮箱:" prop="userEmail">
@@ -149,23 +143,6 @@
           <el-form-item label="用户手机:" prop="userPhone">
             <el-input v-model="form.userPhone" :disabled="active"></el-input>
           </el-form-item>
-          <!-- <el-form-item label="性别:" prop="sex">
-            <el-select v-model="form.sex" class="filter-item" placeholder='请选择' style="width: 280px;">
-              <el-option v-for="item in sexList" :key="item.key" :label="item.display_name"
-                         :value="item.key"></el-option>
-            </el-select>
-          </el-form-item>-->
-          <!-- <el-form-item label="手机号码:" prop="phone">
-            <el-input v-model="form.phone"></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱:" prop="email">
-            <el-input v-model="form.email"></el-input>
-          </el-form-item>
-          <el-form-item label="头像:" prop="avatar">
-            <span>
-              <img :src="form.avatar" alt="" style="width: 50px;height: 50px">
-            </span>
-          </el-form-item>-->
           <el-form-item label="用户状态:" prop="userStatus">
             <el-select
               v-model="form.userStatus"
@@ -209,6 +186,13 @@
               :props="defaultPropsMenu">
             </el-tree>
           </el-form-item>
+          <el-form-item label="用户区域">
+            <el-cascader
+              ref="cascaderArea"
+              v-model="form.areaId"
+              :options="areaList"
+              :props="{value:'id',label:'name',emitPath:false}"></el-cascader>
+          </el-form-item>
 
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -231,7 +215,8 @@
     updateSysUser,
     updateUserStatus,
     getAllListNoParam,
-    getDeptIdByUserId
+    getDeptIdByUserId,
+    treeArea
   } from '@/api/system/user'
   import { treeDept } from '@/api/system/dept'
 
@@ -251,6 +236,7 @@
         ],
         listLoading: true,
         deptTreeList: [],
+        areaList: [],
         total: 0,
         listQuery: {
           page: 1,
@@ -260,7 +246,8 @@
           userPhone: undefined,
           userStatus: undefined,
           createTime: undefined,
-          updateTime: undefined
+          updateTime: undefined,
+          areaId: undefined
         },
         pickerOptions: {
           shortcuts: [{
@@ -290,15 +277,11 @@
           userName: undefined, //用户名
           userEmail: undefined, //用户邮箱
           userPhone: undefined, //用户手机
-          // sex: undefined, //性别 0:男 1:女
-          // phone: undefined, //手机号码
-          // email: undefined, //邮箱
-          // avatar: undefined, //头像
           userStatus: undefined, //状态
-          // gmtCreate: undefined, //创建时间
-          // gmtModified: undefined //更新时间
           roleType: undefined, // 角色名称
-          deptIds: undefined
+          deptIds: undefined, // 部门id
+          areaName: undefined, // 区域名称
+          areaId: undefined // 区域Id
         },
         dialogStatus: '',
         titleMap: {
@@ -309,13 +292,6 @@
           userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
           userEmail: [{ required: true, message: '请输入用户邮箱', trigger: 'blur' }],
           userPhone: [{ required: true, message: '请输入手机号码', trigger: 'blur' }]
-          // pwd: [
-          //   { pattern: /^(\w){6,16}$/, message: "请设置6-16位字母、数字组合" },
-          // ],
-          // nickName: [
-          //   { required: true, message: "请输入你昵称", trigger: "blur" },
-          // ],
-          // flag: [{ required: true, message: "请选择状态", trigger: "blur" }],
         },
         roleList: [],
         defaultPropsMenu: {
@@ -329,6 +305,7 @@
     created() {
       this.getList()
       this.deptTree()
+      this.getArea()
     },
     methods: {
       getList() {
@@ -361,6 +338,8 @@
           return
         }
         this.form.deptIds = selectedIds[0]
+        var areaName = this.$refs['cascaderArea'].getCheckedNodes()[0].pathLabels.toString()
+        this.form.areaName = areaName
         this.$refs.dataForm.validate(valid => {
           if (valid) {
             addUser(this.form).then(response => {
@@ -402,6 +381,8 @@
           return
         }
         this.form.deptIds = selectedIds[0]
+        var areaName = this.$refs.cascaderArea.getCheckedNodes()[0].pathLabels.toString()
+        this.form.areaName = areaName
         this.$refs.dataForm.validate((valid) => {
           if (valid) {
             updateSysUser(this.form)
@@ -457,23 +438,21 @@
           }
         })
       },
-      // submitForm() {
-      //   this.$refs.dataForm.validate(valid => {
-      //     if (valid) {
-      //       saveSysUser(this.form).then(response => {
-      //         if (response.code == 200) {
-      //           this.getList()
-      //           this.submitOk(response.message)
-      //           this.dialogVisible = false
-      //         } else {
-      //           this.submitFail(response.message)
-      //         }
-      //       }).catch(err => {
-      //         console.log(err)
-      //       })
-      //     }
-      //   })
-      // },
+      getArea(){
+        treeArea().then(response => {
+          this.areaList = this.getAreaTree(response.data.areaTree)
+        })
+      },
+      getAreaTree(areaTree) {
+        for (var i = 0; i < areaTree.length; i++) {
+          if (areaTree[i].children.length < 1) {
+            areaTree[i].children = undefined
+          } else {
+            this.getAreaTree(areaTree[i].children)
+          }
+        }
+        return areaTree
+      },
       resetForm() {
         this.form = {
           id: undefined, //主键ID
@@ -485,8 +464,6 @@
           email: undefined, //邮箱
           avatar: undefined, //头像
           flag: undefined //状态
-          // gmtCreate: undefined, //创建时间
-          // gmtModified: undefined //更新时间
         }
       },
       // 监听dialog关闭时的处理事件
@@ -494,7 +471,7 @@
         if (this.$refs['dataForm']) {
           this.$refs['dataForm'].clearValidate() // 清除整个表单的校验
         }
-      }
+      },
     }
   }
 </script>
