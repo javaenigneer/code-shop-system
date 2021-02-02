@@ -19,6 +19,13 @@ const systemMerchant = {
       component: () => import('@/views/system-merchant/merchant'),
       name: '商户信息',
       meta: { title: '商户信息', icon: 'my-user', noCache: true, resources: 'user' }
+    },
+    {
+      path: 'add-merchant',
+      component: () => import('@/views/system-merchant/add-merchant'),
+      name: '添加商户',
+      meta: { title: '添加商户', icon: 'my-user', noCache: true, resources: 'user' },
+      hidden: true
     }
   ]
 };

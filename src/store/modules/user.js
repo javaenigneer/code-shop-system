@@ -82,47 +82,6 @@ const user = {
       return new Promise((resolve, reject) => {
         // 请求获取权限 -> 通过token查询
         getUserInfo(state.token).then(response => {
-          // TODO 权限假数据！！！
-          // response = {
-          //   "code":200,
-          //   "message":"SUCCESS",
-          //   "data":{
-          //     "id":1,
-          //     "username":"admin",
-          //     "nickName":"郑清",
-          //     "sex":"0",
-          //     "phone":"",
-          //     "email":"",
-          //     "avatar":"http://i1.fuimg.com/693357/60e038c77994fc05.jpg",
-          //     "flag":"1",
-          //     "roles":["admin"],
-          //     "menus":[
-          //       {"id":1,"parentId":"0","resources":"systemManage","title":"系统管理","level":1,"icon":"component",
-          //         "children":[
-          //           {"id":17,"parentId":"1","resources":"sysmenuList","title":"菜单管理","level":2,"icon":"my-sysmenu","children":[]},
-          //           {"id":16,"parentId":"1","resources":"roleList","title":"角色管理","level":2,"icon":"my-role","children":[]},
-          //           {"id":2,"parentId":"1","resources":"userList","title":"用户管理","level":2,"icon":"my-user","children":[]}
-          //       ]
-          //       },
-          //       {"id":6,"parentId":"0","resources":"codeGenerator","title":"代码生成器","level":1,"icon":"tree",
-          //         "children":[
-          //           {"id":7,"parentId":"6","resources":"project","title":"项目管理","level":2,"icon":"documentation","children":[]},
-          //           // {"id":8,"parentId":"6","resources":"bs_template","title":"初始模板","level":2,"icon":"guide","children":[]},
-          //
-          //           {"id":10,"parentId":"6","resources":"menuList","title":"公众号菜单","level":2,"icon":"tree","children":[]},
-          //           {"id":12,"parentId":"6","resources":"fansMsgList","title":"粉丝消息","level":2,"icon":"message","children":[]}]},
-          //       {"id":13,"parentId":"0","resources":"wxmpMaterialManage","title":"素材管理","level":1,"icon":"table",
-          //         "children":[{"id":15,"parentId":"13","resources":"newsTemplateList","title":"图文管理","level":2,"icon":"icon-news","children":[]},
-          //           {"id":14,"parentId":"13","resources":"textTemplateList","title":"文本管理","level":2,"icon":"documentation","children":[]}]}],
-          //     "buttons":[{"id":28,"parentId":"9","resources":"receiveTextList:delete","title":"删除","icon":""},
-          //       {"id":30,"parentId":"10","resources":"menuList:addsub","title":"添加下级","icon":""},
-          //       {"id":22,"parentId":"7","resources":"accountList:generateQR","title":"生成二维码","icon":""},
-          //       {"id":48,"parentId":"17","resources":"sysmenuList:addsub","title":"添加下级","icon":""},
-          //       {"id":3,"parentId":"2","resources":"userList:add","title":"添加","icon":"el-icon-edit"},{"id":34,"parentId":"12","resources":"fansMsgList:delete","title":"删除","icon":""},{"id":33,"parentId":"11","resources":"accountFansList:delete","title":"删除","icon":""},{"id":5,"parentId":"2","resources":"userList:delete","title":"删除","icon":null},{"id":41,"parentId":"15","resources":"newsTemplateList:preview","title":"预览","icon":""},{"id":31,"parentId":"10","resources":"menuList:edit","title":"编辑","icon":""},{"id":42,"parentId":"15","resources":"newsTemplateList:delete","title":"删除","icon":""}
-          //   ]
-          //   }
-          // }
-
           // 由于mockjs 不支持自定义状态码只能这样hack
           if (!response.data) {
             reject('Verification failed, please login again.')
@@ -145,13 +104,11 @@ const user = {
             // 通过commit保存到全局变量
             commit('SET_BUTTONS', data.buttons)
           }
-
           commit('SET_USER', data)
           commit('SET_ID', data.id)
           commit('SET_NAME', data.userName)
           commit('SET_AVATAR', data.avatar)
           commit('SET_INTRODUCTION', data.nickName)
-
           resolve(response)
         }).catch(error => {
           reject(error)

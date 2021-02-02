@@ -33,7 +33,7 @@
           :picker-options="pickerOptions">
         </el-date-picker>
         <el-button type="primary" @click="getList" icon="el-icon-search">查询</el-button>
-        <el-button type="primary" @click="toAddMerchant" icon="el-icon-circle-plus-outline">添加商户</el-button>
+        <el-button type="primary" @click="toAddMerchant" icon="el-icon-circle-plus-outline" v-has="'merchant:add'">添加商户</el-button>
       </cus-filter-wraper>
       <div class="table-container">
         <el-table
@@ -52,23 +52,24 @@
           <el-table-column label="商户号" prop="number" align="center"></el-table-column>
           <el-table-column label="商户手机" prop="phone" align="center"></el-table-column>
           <el-table-column label="加入时间" prop="createTime" align="center"></el-table-column>
+          <el-table-column label="入驻时间" prop="setCreateTime" align="center"></el-table-column>
           <el-table-column label="状态" prop="status" align="center">
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.status == 1"
+              <el-tag v-if="scope.row.status === 1"
                       type="success"
                       hit
               >审核通过
               </el-tag>
-              <el-tag v-if="scope.row.status == 2"
+              <el-tag v-if="scope.row.status === 2"
                       hit
               >未审核
               </el-tag>
-              <el-tag v-if="scope.row.status == 0"
+              <el-tag v-if="scope.row.status === 0"
                       type="danger"
                       hit
-              >审核失败
+              >审核未通过
               </el-tag>
-              <el-tag v-if="scope.row.status == 3"
+              <el-tag v-if="scope.row.status === 3"
                       type="info"
                       hit
               >未入驻
@@ -77,16 +78,23 @@
           </el-table-column>
           <el-table-column
             align="center"
-            v-if="this.global_checkBtnPermission(['user:edit','user:delete','user:enable'])"
+            v-if="this.global_checkBtnPermission(['merchant:examine'])"
             :label="$t('table.actions')"
           >
             <template slot-scope="scope">
               <el-button
-                v-if="scope.row.status != 1"
+                v-if="scope.row.status === 2"
                 size="mini"
                 type="success"
                 @click="goExamineMerchant(scope.row)"
               >{{ $t('table.examine') }}
+              </el-button>
+              <el-button
+                v-if="scope.row.status === 3"
+                size="mini"
+                type="danger"
+                @click="goExamineMerchant(scope.row)"
+              > 删除
               </el-button>
               <cus-del-btn v-has="'user:delete'" @ok="handleDelete(scope.row)"/>
             </template>
@@ -108,10 +116,10 @@
         center>
         <el-form ref="form" :model="merchantDetail" label-width="80px">
           <el-form-item label="商户号">
-            <el-input v-model="merchantDetail.number"></el-input>
+            <el-input v-model="merchantDetail.number" disabled></el-input>
           </el-form-item>
           <el-form-item label="商户名称">
-            <el-input v-model="merchantDetail.merchantName"></el-input>
+            <el-input v-model="merchantDetail.merchantName" disabled></el-input>
           </el-form-item>
           <el-form-item label="身份证正面">
 
@@ -274,7 +282,6 @@
     },
     created() {
       this.getList()
-      this.deptTree()
     },
     methods: {
       getList() {
@@ -283,87 +290,6 @@
           this.list = response.data.data
           this.total = response.data.total
           this.listLoading = false
-        })
-      },
-      // 获取全部角色
-      getRoleList() {
-        getAllListNoParam().then((response) => {
-          this.roleList = response.data
-        })
-      },
-      handleCreate() {
-        this.defaultCheckedKeysMenu = []
-        this.active = false
-        this.getRoleList()
-        this.resetForm()
-        this.dialogStatus = 'create'
-        this.dialogVisible = true
-        this.deptTree()
-      },
-      createUser() {
-        var selectedIds = this.$refs.menuTree.getCheckedKeys()
-        if (selectedIds.length >= 2 || selectedIds.length <= 0) {
-          this.submitWarning('请选择一个部门')
-          return
-        }
-        this.form.deptIds = selectedIds[0]
-        this.$refs.dataForm.validate(valid => {
-          if (valid) {
-            addUser(this.form).then(response => {
-              if (response.code == 20000) {
-                this.getList()
-                this.submitOk(response.msg)
-                this.dialogVisible = false
-              } else {
-                this.submitFail(response.msg)
-              }
-            }).catch(err => {
-              console.log(err)
-            })
-          }
-        })
-      },
-      handleUpdate(row) {
-        this.defaultCheckedKeysMenu = []
-        this.active = true
-        this.getRoleList()
-        this.deptTree()
-        this.form = Object.assign({}, row)
-        getDeptIdByUserId(row.userId).then(response => {
-          if (response.data && response.data.length > 0) {
-            this.defaultCheckedKeysMenu = this._.map(response.data, 'deptId')
-          }
-        })
-        this.$delete(this.form, 'createTime')
-        this.$delete(this.form, 'updateTime')
-        this.$delete(this.form, 'userRole')
-        this.$delete(this.form, 'userDept')
-        this.dialogStatus = 'update'
-        this.dialogVisible = true
-      },
-      updateUser() {
-        var selectedIds = this.$refs.menuTree.getCheckedKeys()
-        if (selectedIds.length >= 2 || selectedIds.length <= 0) {
-          this.submitWarning('请选择一个部门')
-          return
-        }
-        this.form.deptIds = selectedIds[0]
-        this.$refs.dataForm.validate((valid) => {
-          if (valid) {
-            updateSysUser(this.form)
-              .then((response) => {
-                if (response.code == 20000) {
-                  this.getList()
-                  this.submitOk(response.msg)
-                  this.dialogVisible = false
-                } else {
-                  this.submitFail(response.msg)
-                }
-              })
-              .catch((err) => {
-                console.log(err)
-              })
-          }
         })
       },
       goExamineMerchant(row) {
@@ -384,70 +310,14 @@
           }
         })
       },
-      handleDelete(row) {
-        let userId = row.userId
-        deleteSysUser(userId).then((response) => {
-          if (response.code == 20000) {
-            this.getList()
-            this.submitOk(response.msg)
-          } else {
-            this.submitFail(response.msg)
-          }
-        })
-      },
-
-      deptTree() {
-        treeDept().then(response => {
-          this.deptTreeList = response.data.deptTree
-        })
-      },
-
-      getDeptIdByUserId(userId) {
-        getDeptIdByUserId(userId).then(response => {
-          if (response.code === 20000) {
-            this.deptIdCheckId = response.data
-          } else {
-            this.deptIdCheckId = null
-          }
-        })
-      },
-      // submitForm() {
-      //   this.$refs.dataForm.validate(valid => {
-      //     if (valid) {
-      //       saveSysUser(this.form).then(response => {
-      //         if (response.code == 200) {
-      //           this.getList()
-      //           this.submitOk(response.message)
-      //           this.dialogVisible = false
-      //         } else {
-      //           this.submitFail(response.message)
-      //         }
-      //       }).catch(err => {
-      //         console.log(err)
-      //       })
-      //     }
-      //   })
-      // },
-      resetForm() {
-        this.form = {
-          id: undefined, //主键ID
-          username: undefined, //账号
-          pwd: undefined, //登录密码
-          nickName: undefined, //昵称
-          sex: undefined, //性别 0:男 1:女
-          phone: undefined, //手机号码
-          email: undefined, //邮箱
-          avatar: undefined, //头像
-          flag: undefined //状态
-          // gmtCreate: undefined, //创建时间
-          // gmtModified: undefined //更新时间
-        }
-      },
       // 监听dialog关闭时的处理事件
       handleDialogClose() {
         if (this.$refs['dataForm']) {
           this.$refs['dataForm'].clearValidate() // 清除整个表单的校验
         }
+      },
+      toAddMerchant(){
+        this.$router.push({path:'/systemMerchant/add-merchant'})
       }
     }
   }

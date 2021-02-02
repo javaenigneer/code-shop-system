@@ -79,7 +79,7 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
-      return Promise.reject('error')
+      this.$router.push({path:'/login'})
     }
     // 数据为空
     if (res.code === 20004) {

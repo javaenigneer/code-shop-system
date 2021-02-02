@@ -1,8 +1,8 @@
 <template>
   <div class="navbar">
-    <hamburger :toggle-click="toggleSideBar" :is-active="sidebar.opened" class="hamburger-container" />
+    <hamburger :toggle-click="toggleSideBar" :is-active="sidebar.opened" class="hamburger-container"/>
 
-    <breadcrumb class="breadcrumb-container" />
+    <breadcrumb class="breadcrumb-container"/>
 
     <div class="right-menu">
       <!-- websocket聊天室 -->
@@ -19,39 +19,39 @@
       <template v-if="device!=='mobile'">
 
         <!-- 菜单搜索 -->
-        <search class="right-menu-item" />
+        <search class="right-menu-item"/>
 
-        <error-log class="errLog-container right-menu-item hover-effect" />
+        <error-log class="errLog-container right-menu-item hover-effect"/>
 
-        <screenfull class="right-menu-item hover-effect" />
+        <screenfull class="right-menu-item hover-effect"/>
 
         <el-tooltip :content="$t('navbar.size')" effect="dark" placement="bottom">
-          <size-select class="right-menu-item hover-effect" />
+          <size-select class="right-menu-item hover-effect"/>
         </el-tooltip>
 
         <!-- 语言包 -->
         <!--<lang-select class="right-menu-item hover-effect" />-->
 
         <el-tooltip :content="$t('navbar.theme')" effect="dark" placement="bottom">
-          <theme-picker class="right-menu-item hover-effect" />
+          <theme-picker class="right-menu-item hover-effect"/>
         </el-tooltip>
       </template>
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
+          <i class="el-icon-caret-bottom"/>
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/">
             <el-dropdown-item style="font-size: 16px">
-              <svg-icon icon-class="dashboard" style="margin-right: 8px" />
+              <svg-icon icon-class="dashboard" style="margin-right: 8px"/>
               {{ $t('navbar.dashboard') }}
             </el-dropdown-item>
           </router-link>
           <router-link to="/my/loginInfo">
             <el-dropdown-item style="font-size: 16px">
-              <svg-icon icon-class="user" style="margin-right: 8px" />
+              <svg-icon icon-class="user" style="margin-right: 8px"/>
               个人信息
             </el-dropdown-item>
           </router-link>
@@ -62,7 +62,7 @@
           <!--</a>-->
           <el-dropdown-item divided>
             <span style="display:block;font-size: 16px" @click="logout">
-              <svg-icon icon-class="logout" style="margin-right: 8px" />
+              <svg-icon icon-class="logout" style="margin-right: 8px"/>
               {{ $t('navbar.logOut') }}
             </span>
           </el-dropdown-item>
@@ -73,133 +73,131 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
-import ErrorLog from '@/components/ErrorLog'
-import Screenfull from '@/components/Screenfull'
-import SizeSelect from '@/components/SizeSelect'
-import LangSelect from '@/components/LangSelect'
-import ThemePicker from '@/components/ThemePicker'
-import Search from '@/components/HeaderSearch'
-import {logout} from '@/api/login'
+  import { mapGetters } from 'vuex'
+  import Breadcrumb from '@/components/Breadcrumb'
+  import Hamburger from '@/components/Hamburger'
+  import ErrorLog from '@/components/ErrorLog'
+  import Screenfull from '@/components/Screenfull'
+  import SizeSelect from '@/components/SizeSelect'
+  import LangSelect from '@/components/LangSelect'
+  import ThemePicker from '@/components/ThemePicker'
+  import Search from '@/components/HeaderSearch'
+  import { logout } from '@/api/login'
+  import { getToken, setToken, removeToken } from '@/utils/auth'
 
-export default {
-  components: {
-    Breadcrumb,
-    Hamburger,
-    ErrorLog,
-    Screenfull,
-    SizeSelect,
-    LangSelect,
-    ThemePicker,
-    Search
-  },
-  computed: {
-    ...mapGetters([
-      'sidebar',
-      'name',
-      'introduction',
-      'avatar',
-      'device'
-    ])
-  },
-  methods: {
-    toggleSideBar() {
-      this.$store.dispatch('toggleSideBar')
+  export default {
+    components: {
+      Breadcrumb,
+      Hamburger,
+      ErrorLog,
+      Screenfull,
+      SizeSelect,
+      LangSelect,
+      ThemePicker,
+      Search
     },
-    logout() {
-      // this.$store.dispatch('LogOut');
-      // this.$router.push('/login?redirect=${this.$router.fullPath}')
-      this.$store.dispatch('LogOut').then(() => {
-        this.$router.push({path: '/dashboard'});
-        location.reload()// In order to re-instantiate the vue-router object to avoid bugs
-      })
-      // logout("111").then(response => {
-      //   console.log(response.data);
-      // })
-      // console.log("退出")
+    computed: {
+      ...mapGetters([
+        'sidebar',
+        'name',
+        'introduction',
+        'avatar',
+        'device'
+      ])
+    },
+    methods: {
+      toggleSideBar() {
+        this.$store.dispatch('toggleSideBar')
+      },
+      logout() {
+        logout().then((response) => {
+          if (response.code === 20000) {
+            removeToken()
+            this.$router.push({ path: '/login' })
+            location.reload()// In order to re-instantiate the vue-router object to avoid bugs
+          }
+        })
+      }
     }
   }
-}
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-.navbar {
-  height: 50px;
-  overflow: hidden;
+  .navbar {
+    height: 50px;
+    overflow: hidden;
 
-  .hamburger-container {
-    line-height: 46px;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-    transition: background .3s;
-
-    &:hover {
-      background: rgba(0, 0, 0, .025)
-    }
-  }
-
-  .breadcrumb-container {
-    float: left;
-  }
-
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
-  }
-
-  .right-menu {
-    float: right;
-    height: 100%;
-    line-height: 50px;
-
-    &:focus {
-      outline: none;
-    }
-
-    .right-menu-item {
-      display: inline-block;
-      padding: 0 8px;
+    .hamburger-container {
+      line-height: 46px;
       height: 100%;
-      font-size: 18px;
-      color: #5a5e66;
-      vertical-align: text-bottom;
+      float: left;
+      cursor: pointer;
+      transition: background .3s;
 
-      &.hover-effect {
-        cursor: pointer;
-        transition: background .3s;
-
-        &:hover {
-          background: rgba(0, 0, 0, .025)
-        }
+      &:hover {
+        background: rgba(0, 0, 0, .025)
       }
     }
 
-    .avatar-container {
-      margin-right: 30px;
+    .breadcrumb-container {
+      float: left;
+    }
 
-      .avatar-wrapper {
-        margin-top: 5px;
-        position: relative;
+    .errLog-container {
+      display: inline-block;
+      vertical-align: top;
+    }
 
-        .user-avatar {
+    .right-menu {
+      float: right;
+      height: 100%;
+      line-height: 50px;
+
+      &:focus {
+        outline: none;
+      }
+
+      .right-menu-item {
+        display: inline-block;
+        padding: 0 8px;
+        height: 100%;
+        font-size: 18px;
+        color: #5a5e66;
+        vertical-align: text-bottom;
+
+        &.hover-effect {
           cursor: pointer;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
+          transition: background .3s;
+
+          &:hover {
+            background: rgba(0, 0, 0, .025)
+          }
         }
+      }
 
-        .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
-          font-size: 12px;
+      .avatar-container {
+        margin-right: 30px;
+
+        .avatar-wrapper {
+          margin-top: 5px;
+          position: relative;
+
+          .user-avatar {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+          }
+
+          .el-icon-caret-bottom {
+            cursor: pointer;
+            position: absolute;
+            right: -20px;
+            top: 25px;
+            font-size: 12px;
+          }
         }
       }
     }
   }
-}
 </style>

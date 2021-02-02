@@ -8,7 +8,7 @@ export function loginByUsername(username, password, openId, accessToken) {
     accessToken
   }
   return request({
-    url: '/codeworld-auth/system-login',
+    url: '/codeworld-auth/web/system/system-login',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function loginByUsername(username, password, openId, accessToken) {
 
 export function logout(token) {
   return request({
-    url: '/codeworld-user/user-login-out',
+    url: '/codeworld-auth/login-out',
     method: 'post',
     data: {token}
   })
@@ -33,7 +33,7 @@ export function logout(token) {
 
 export function getUserInfo(token) {
   return request({
-    url: '/codeworld-auth/get-system-login-info',
+    url: '/codeworld-auth/web/system/get-system-login-info',
     method: 'post',
     data: {token}
   })

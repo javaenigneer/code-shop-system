@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
       <div class="title-container">
         <h3 class="title">
-          {{ $t('login.title') }}
+         管理后台
         </h3>
         <lang-select class="set-language"/>
       </div>
@@ -45,12 +45,6 @@
 
       <div style="position:relative">
       <div class="tips">
-      <span>{{ $t('login.username') }} : 1111</span>
-      <span>{{ $t('login.password') }} : 123456</span>
-      </div>
-      <div class="tips">
-      <span style="margin-right:18px;">{{ $t('login.username') }} : code</span>
-      <span>{{ $t('login.password') }} : 123456</span>
       </div>
 
 <!--      <el-button class="thirdparty-button" type="primary" @click="showDialog=true">{{ $t('login.thirdparty') }}</el-button>-->
@@ -93,8 +87,8 @@ export default {
     }
     return {
       loginForm: {
-        username: '1111',
-        password: '123456'
+        username: '',
+        password: ''
       },
       loginRules: {
         // username: [{ required: true, trigger: 'blur', validator: validateUsername }],
