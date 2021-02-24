@@ -53,7 +53,7 @@
         >
           <el-table-column fixed label="ID" prop="id" align="center"></el-table-column>
           <el-table-column label="标题" prop="title" align="center"></el-table-column>
-          <el-table-column label="图片"  align="center">
+          <el-table-column label="图片" align="center">
             <template slot-scope="scope">
               <el-image
                 style="width: 50px; height: 50px"
@@ -121,7 +121,7 @@
                 @click="review(scope.row)"
               >{{ $t('table.examine') }}
               </el-button>
-<!--              <cus-del-btn v-has="'order:delete'" @ok="handleDelete(scope.row)"/>-->
+              <!--              <cus-del-btn v-has="'order:delete'" @ok="handleDelete(scope.row)"/>-->
             </template>
           </el-table-column>
         </el-table>
@@ -135,7 +135,7 @@
         />
       </div>
 
-      <el-dialog title="收货地址" :visible.sync="reviewVisible" >
+      <el-dialog title="收货地址" :visible.sync="reviewVisible">
         <el-form ref="form" :model="carouseDetail" label-width="80px">
           <el-form-item label="ID">
             <el-input v-model="carouseDetail.id" disabled></el-input>
@@ -227,7 +227,7 @@
           create: '创建'
         },
         reviewVisible: false,
-        carouseDetail:{
+        carouseDetail: {
           id: '',
           title: '',
           image: '',
@@ -256,11 +256,11 @@
           }
         })
       },
-      handleCreate(){
-        this.$router.push({path:'/systemMarketing/add-carouse'})
+      handleCreate() {
+        this.$router.push({ path: '/systemMarketing/add-carouse' })
       },
       handleModifyStatus: function(row, status) {
-        let carouse  = {}
+        let carouse = {}
         carouse.id = row.id
         carouse.status = status
         updateCarouseStatus(carouse).then((response) => {
@@ -272,14 +272,25 @@
           }
         })
       },
-      review(row){
+      review(row) {
         this.reviewVisible = true
         this.carouseDetail = row
         this.carouseDetail.reviewStatus = ''
       },
-      reviewCarouse(){
-        reviewCarouse(this.carouseDetail).then((response => {
-
+      reviewCarouse() {
+        let reviewCarouseRequest = {}
+        reviewCarouseRequest.id = this.carouseDetail.id
+        reviewCarouseRequest.reviewStatus = this.carouseDetail.reviewStatus
+        reviewCarouseRequest.startTime = this.carouseDetail.startTime
+        reviewCarouseRequest.endTime = this.carouseDetail.endTime
+        reviewCarouse(reviewCarouseRequest).then((response => {
+          if (response.code === 20000) {
+            this.submitOk(response.msg)
+            this.reviewVisible = false
+            this.getList()
+          } else {
+            this.submitFail(response.msg)
+          }
         }))
       },
       // 监听dialog关闭时的处理事件
