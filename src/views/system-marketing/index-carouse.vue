@@ -75,28 +75,53 @@
               </el-tag>
             </template>
           </el-table-column>
+          <el-table-column label="审核状态" prop="reviewStatus" align="center">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.reviewStatus == 0"
+                      type="info"
+                      hit
+              >未审核
+              </el-tag>
+              <el-tag v-if="scope.row.reviewStatus == 1"
+                      type="success"
+                      hit
+              >审核通过
+              </el-tag>
+              <el-tag v-if="scope.row.reviewStatus == -1"
+                      type="danger"
+                      hit
+              >未通过
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="位置" prop="position" align="center">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.position == 1"
+                      type="success"
+                      hit
+              >App首页
+              </el-tag>
+              <el-tag v-if="scope.row.position == 2"
+                      type="success"
+                      hit
+              >店铺
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column
             align="center"
-            v-if="this.global_checkBtnPermission(['order:view','order:delivery'])"
+            v-if="this.global_checkBtnPermission(['review:carouse'])"
             :label="$t('table.actions')"
           >
             <template slot-scope="scope">
               <el-button
-                v-if="scope.row.status != 1"
+                v-if="scope.row.reviewStatus === 0"
                 size="mini"
                 type="success"
-                @click="handleModifyStatus(scope.row,1)"
-              >{{ $t('table.enable') }}
+                @click="review(scope.row)"
+              >{{ $t('table.examine') }}
               </el-button>
-              <el-button
-                v-if="scope.row.status == 0"
-                v-has="'order:delivery'"
-                size="mini"
-                type="success"
-                @click="handleModifyStatus(scope.row,0)"
-              >{{ $t('table.disable') }}
-              </el-button>
-              <cus-del-btn v-has="'order:delete'" @ok="handleDelete(scope.row)"/>
+<!--              <cus-del-btn v-has="'order:delete'" @ok="handleDelete(scope.row)"/>-->
             </template>
           </el-table-column>
         </el-table>
@@ -109,6 +134,40 @@
           @pagination="getList"
         />
       </div>
+
+      <el-dialog title="收货地址" :visible.sync="reviewVisible" >
+        <el-form ref="form" :model="carouseDetail" label-width="80px">
+          <el-form-item label="ID">
+            <el-input v-model="carouseDetail.id" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="标题">
+            <el-input v-model="carouseDetail.title" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="图片">
+            <el-image :src="carouseDetail.image" fit="cover" style="width: 100px;height: 100px"></el-image>
+          </el-form-item>
+          <el-form-item label="开始时间">
+            <el-input v-model="carouseDetail.startTime" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="结束时间">
+            <el-input v-model="carouseDetail.endTime" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="位置">
+            <el-input v-model="carouseDetail.position == 1 ? 'App端' : '店铺'" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="审核状态">
+            <el-select v-model="carouseDetail.reviewStatus" placeholder="请选择审核状态">
+              <el-option label="通过" value="1"></el-option>
+              <el-option label="不通过" value="-1"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="reviewCarouse">立即审核</el-button>
+            <el-button>取消</el-button>
+          </el-form-item>
+        </el-form>
+      </el-dialog>
+
     </cus-wraper>
   </div>
 </template>
@@ -116,7 +175,8 @@
 <script>
   import {
     getPageCarouse,
-    updateCarouseStatus
+    updateCarouseStatus,
+    reviewCarouse
   } from '@/api/marketing/carouse'
 
   export default {
@@ -165,6 +225,18 @@
         titleMap: {
           update: '编辑',
           create: '创建'
+        },
+        reviewVisible: false,
+        carouseDetail:{
+          id: '',
+          title: '',
+          image: '',
+          status: '',
+          startTime: '',
+          endTime: '',
+          reviewStatus: '',
+          position: '',
+          merchantNumber: ''
         }
       }
     },
@@ -199,6 +271,16 @@
             this.submitFail(response.msg)
           }
         })
+      },
+      review(row){
+        this.reviewVisible = true
+        this.carouseDetail = row
+        this.carouseDetail.reviewStatus = ''
+      },
+      reviewCarouse(){
+        reviewCarouse(this.carouseDetail).then((response => {
+
+        }))
       },
       // 监听dialog关闭时的处理事件
       handleDialogClose() {
