@@ -30,3 +30,11 @@ export function reviewCarouse(reviewCarouseRequest) {
     data: reviewCarouseRequest
   });
 }
+
+export function deleteCarouse(id) {
+  return request({
+    url: '/codeworld-marketing/carouse/delete-carouse',
+    method: 'post',
+    params: {id}
+  });
+}

@@ -70,8 +70,9 @@
               >已启用
               </el-tag>
               <el-tag v-if="scope.row.status == 0"
+                      type="warning"
                       hit
-              >未启用
+              >已过期
               </el-tag>
             </template>
           </el-table-column>
@@ -121,7 +122,7 @@
                 @click="review(scope.row)"
               >{{ $t('table.examine') }}
               </el-button>
-              <!--              <cus-del-btn v-has="'order:delete'" @ok="handleDelete(scope.row)"/>-->
+              <cus-del-btn v-has="'delete:carouse'" @ok="deleteCarouse(scope.row)"/>
             </template>
           </el-table-column>
         </el-table>
@@ -176,7 +177,8 @@
   import {
     getPageCarouse,
     updateCarouseStatus,
-    reviewCarouse
+    reviewCarouse,
+    deleteCarouse
   } from '@/api/marketing/carouse'
 
   export default {
@@ -264,7 +266,7 @@
         carouse.id = row.id
         carouse.status = status
         updateCarouseStatus(carouse).then((response) => {
-          if (response.code == 20000) {
+          if (response.code === 20000) {
             this.submitOk(response.msg)
             row.saleAble = status
           } else {
@@ -290,6 +292,18 @@
             this.getList()
           } else {
             this.submitFail(response.msg)
+          }
+        }))
+      },
+      deleteCarouse(row){
+        deleteCarouse(row.id).then((response => {
+          if (response.code === 20000){
+            if (response.code === 20000) {
+              this.submitOk(response.msg)
+              this.getList()
+            } else {
+              this.submitFail(response.msg)
+            }
           }
         }))
       },

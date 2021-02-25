@@ -65,8 +65,8 @@
       }
     },
     created() {
-      this.getAllUserCount();
-      this.getActiveUserCount();
+      // this.getAllUserCount();
+      // this.getActiveUserCount();
     },
     methods: {
       jumpUrl(type) {
