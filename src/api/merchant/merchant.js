@@ -33,7 +33,13 @@ export function addMerchant(data) {
   });
 }
 
-
+export function transferMerchant(data) {
+  return request({
+    url: '/codeworld-merchant/web/transfer-merchant',
+    method: 'post',
+    data: data
+  });
+}
 
 
 

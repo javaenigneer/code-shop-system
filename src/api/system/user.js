@@ -78,10 +78,20 @@ export function treeArea() {
     method: 'get'
   });
 }
+
 // 获取全部角色无参数
 export function getAllListNoParam() {
   return request({
     url: '/codeworld-system/role/get-all-role-no-param',
     method: 'post'
+  });
+}
+
+// 获取区域的商户管理员
+export function getAreaMerchantUser(userName) {
+  return request({
+    url: '/codeworld-system/user/get-area-merchant-user',
+    method: 'get',
+    params: {userName}
   });
 }

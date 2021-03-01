@@ -33,7 +33,9 @@
           :picker-options="pickerOptions">
         </el-date-picker>
         <el-button type="primary" @click="getList" icon="el-icon-search">查询</el-button>
-        <el-button type="primary" @click="toAddMerchant" icon="el-icon-circle-plus-outline" v-has="'merchant:add'">添加商户</el-button>
+        <el-button type="primary" @click="toAddMerchant" icon="el-icon-circle-plus-outline" v-has="'merchant:add'">
+          添加商户
+        </el-button>
       </cus-filter-wraper>
       <div class="table-container">
         <el-table
@@ -78,23 +80,22 @@
           </el-table-column>
           <el-table-column
             align="center"
-            v-if="this.global_checkBtnPermission(['merchant:examine'])"
+            v-if="this.global_checkBtnPermission(['merchant:transfer','merchant:exmaine'])"
             :label="$t('table.actions')"
           >
             <template slot-scope="scope">
               <el-button
-                v-if="scope.row.status === 2"
+                size="mini"
+                type="success"
+                @click="goTransferMerchant(scope.row)"
+              >{{ $t('table.transfer') }}
+              </el-button>
+              <el-button
+                v-if="scope.row.status == 2"
                 size="mini"
                 type="success"
                 @click="goExamineMerchant(scope.row)"
               >{{ $t('table.examine') }}
-              </el-button>
-              <el-button
-                v-if="scope.row.status === 3"
-                size="mini"
-                type="danger"
-                @click="goExamineMerchant(scope.row)"
-              > 删除
               </el-button>
               <cus-del-btn v-has="'user:delete'" @ok="handleDelete(scope.row)"/>
             </template>
@@ -109,12 +110,13 @@
           @pagination="getList"
         />
       </div>
+      <!-- 商户审核 -->
       <el-dialog
         title="提示"
-        :visible.sync="centerDialogVisible"
+        :visible.sync="examineDialogVisible"
         width="50%"
         center>
-        <el-form ref="form" :model="merchantDetail" label-width="80px">
+        <el-form ref="form" :model="merchantDetail" label-width="100px">
           <el-form-item label="商户号">
             <el-input v-model="merchantDetail.number" disabled></el-input>
           </el-form-item>
@@ -139,20 +141,79 @@
               </el-image>
             </div>
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="merchantDetail.currentStatus" placeholder="请选择">
+          <el-form-item label="审核">
+            <el-select
+              v-model="merchantDetail.status"
+              class="filter-item"
+              placeholder="请选择状态"
+              style="width: 150px;"
+            >
               <el-option
                 v-for="item in options"
                 :key="item.value"
                 :label="item.label"
-                :value="item.value">
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="this.examineDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="examineMerchant()">确 定</el-button>
+  </span>
+      </el-dialog>
+      <!-- 商户转移 -->
+      <el-dialog
+        title="提示"
+        :visible.sync="transferDialogVisible"
+        width="50%"
+        center>
+        <el-form ref="form" :model="merchantDetail" label-width="100px">
+          <el-form-item label="商户号">
+            <el-input v-model="merchantDetail.number" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="商户名称">
+            <el-input v-model="merchantDetail.merchantName" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="身份证正面">
+
+            <div class="block">
+              <el-image :src="merchantDetail.idCardFront" fit="cover" style="width: 100px;height: 100px"></el-image>
+            </div>
+          </el-form-item>
+          <el-form-item label="身份证背面">
+            <div class="block">
+              <el-image :src="merchantDetail.idCardBack" fit="cover" style="width: 100px;height: 100px">
+              </el-image>
+            </div>
+          </el-form-item>
+          <el-form-item label="营业执照">
+            <div class="block">
+              <el-image :src="merchantDetail.license" fit="cover" style="width: 100px;height: 100px">
+              </el-image>
+            </div>
+          </el-form-item>
+          <el-form-item label="商户管理员">
+            <el-select
+              v-model="merchantDetail.userId"
+              filterable
+              remote
+              reserve-keyword
+              placeholder="请输入关键词"
+              :remote-method="remoteMethod"
+              :loading="loading">
+              <el-option
+                v-for="item in users"
+                :key="item.userId"
+                :label="item.userName"
+                :value="item.userId">
               </el-option>
             </el-select>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
-    <el-button @click="this.centerDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="examineMerchant()">确 定</el-button>
+    <el-button @click="this.transferDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="transferMerchant()">确 定</el-button>
   </span>
       </el-dialog>
     </cus-wraper>
@@ -163,13 +224,9 @@
   import {
     getPageMerchant,
     examineMerchant,
-    deleteSysUser,
-    updateSysUser,
-    updateUserStatus,
-    getAllListNoParam,
-    getDeptIdByUserId
+    transferMerchant
   } from '@/api/merchant/merchant'
-  import { treeDept } from '@/api/system/dept'
+  import { getAreaMerchantUser } from '@/api/system/user'
 
   export default {
     data() {
@@ -182,10 +239,12 @@
           label: '未通过'
         }],
         value: '',
-        centerDialogVisible: false,
+        examineDialogVisible: false,
+        transferDialogVisible: false,
         active: false,
         dialogVisible: false,
         list: [],
+        users: [],
         sexList: [
           { key: '0', display_name: '男' },
           { key: '1', display_name: '女' }
@@ -198,6 +257,7 @@
         listLoading: true,
         deptTreeList: [],
         total: 0,
+        loading: false,
         listQuery: {
           page: 1,
           limit: 10,
@@ -276,7 +336,8 @@
           license: '',
           type: '',
           status: '',
-          currentStatus: ''
+          currentStatus: '',
+          userId: ''
         }
       }
     },
@@ -292,10 +353,15 @@
           this.listLoading = false
         })
       },
-      goExamineMerchant(row) {
-        this.centerDialogVisible = true
+      goTransferMerchant(row) {
+        this.transferDialogVisible = true
         Object.assign(this.merchantDetail, row)
       },
+      goExamineMerchant(row) {
+        this.examineDialogVisible = true
+        Object.assign(this.merchantDetail, row)
+      },
+      // 审核商户
       examineMerchant() {
         var param = {}
         param.number = this.merchantDetail.number
@@ -304,11 +370,26 @@
           if (response.code === 20000) {
             this.getList()
             this.submitOk(response.msg)
-            this.centerDialogVisible = false
+            this.examineDialogVisible = false
           } else {
             this.submitFail(response.msg)
           }
         })
+      },
+      // 转移商户
+      transferMerchant() {
+        var param = {}
+        param.merchantNumber = this.merchantDetail.number
+        param.userId = this.merchantDetail.userId
+        transferMerchant(param).then((response => {
+          if (response.code === 20000) {
+            this.getList()
+            this.submitOk(response.msg)
+            this.transferDialogVisible = false
+          }else {
+            this.submitFail(response.msg)
+          }
+        }))
       },
       // 监听dialog关闭时的处理事件
       handleDialogClose() {
@@ -316,8 +397,26 @@
           this.$refs['dataForm'].clearValidate() // 清除整个表单的校验
         }
       },
-      toAddMerchant(){
-        this.$router.push({path:'/systemMerchant/add-merchant'})
+      toAddMerchant() {
+        this.$router.push({ path: '/systemMerchant/add-merchant' })
+      },
+      // 远程搜索
+      remoteMethod(query) {
+        if (query !== '') {
+          this.loading = true
+          // 获取同个区域的管理员
+          getAreaMerchantUser(query).then((response => {
+            if (response.code === 20000) {
+              this.users = response.data
+              this.loading = false
+            } else {
+              this.users = []
+            }
+          }))
+        } else {
+          this.users = []
+          this.loading = false
+        }
       }
     }
   }

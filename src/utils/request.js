@@ -117,7 +117,7 @@ service.interceptors.response.use(
       })
     }
     // 请求成功
-    else if(res.code === 20000) {
+    else if(res.code === 20000 || res.code === 20004) {
       return response.data
     }
   },

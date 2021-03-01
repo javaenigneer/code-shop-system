@@ -146,7 +146,8 @@ export default {
     importGoods: '导入到索引库',
     examine: '审核',
     viewOrder:'查看订单',
-    orderDelivery:'订单发货'
+    orderDelivery:'订单发货',
+    transfer: '转移'
   },
   errorLog: {
     tips: '请点击右上角bug小图标',
