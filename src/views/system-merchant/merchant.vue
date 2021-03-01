@@ -32,6 +32,14 @@
           align="right"
           :picker-options="pickerOptions">
         </el-date-picker>
+        <el-date-picker
+          v-model="listQuery.settlementTime"
+          type="datetime"
+          placeholder="入驻时间"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          align="right"
+          :picker-options="pickerOptions">
+        </el-date-picker>
         <el-button type="primary" @click="getList" icon="el-icon-search">查询</el-button>
         <el-button type="primary" @click="toAddMerchant" icon="el-icon-circle-plus-outline" v-has="'merchant:add'">
           添加商户
@@ -264,7 +272,8 @@
           nickName: undefined,
           status: undefined,
           createTime: undefined,
-          updateTime: undefined
+          updateTime: undefined,
+          settlementTime: undefined
         },
         pickerOptions: {
           shortcuts: [{
