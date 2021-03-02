@@ -43,7 +43,7 @@
     },
     methods: {
       sendSms() {
-        if (this.form.phone == '' || this.form.phone == undefined) {
+        if (this.form.phone === '' || this.form.phone === undefined) {
           this.$message({
             type: 'info',
             message: '请输入手机号'
