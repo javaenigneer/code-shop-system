@@ -193,6 +193,9 @@
               :options="areaList"
               :props="{value:'id',label:'name',emitPath:false}"></el-cascader>
           </el-form-item>
+          <el-form-item label="备注信息">
+            <el-input type="textarea" v-model="form.remark"></el-input>
+          </el-form-item>
 
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -281,7 +284,8 @@
           roleType: undefined, // 角色名称
           deptIds: undefined, // 部门id
           areaName: undefined, // 区域名称
-          areaId: undefined // 区域Id
+          areaId: undefined, // 区域Id
+          remark: undefined // 备注信息
         },
         dialogStatus: '',
         titleMap: {
