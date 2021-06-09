@@ -67,10 +67,39 @@
           <el-table-column label="修改时间" prop="updateTime" align="center"></el-table-column>
           <el-table-column label="状态" prop="saleAble" align="center">
             <template slot-scope="scope">
-              <el-tag
-                :type="scope.row.saleAble == 1 ? 'success' : 'danger'"
-                hit
-              >{{ scope.row.saleAble == 1 ? '上架' : '下架' }}
+              <el-tag v-if="scope.row.saleAble == 1"
+                      type="success"
+                      hit
+              >上架
+              </el-tag>
+              <el-tag v-if="scope.row.saleAble == 0"
+                      type="warning"
+                      hit
+              >下架
+              </el-tag>
+              <el-tag v-if="scope.row.saleAble == -1"
+                      type="danger"
+                      hit
+              >删除
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="审核状态" prop="approveStatus" align="center">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.approveStatus == 1"
+                      type="success"
+                      hit
+              >审核通过
+              </el-tag>
+              <el-tag v-if="scope.row.approveStatus == 0"
+                      type="danger"
+                      hit
+              >审核未通过
+              </el-tag>
+              <el-tag v-if="scope.row.approveStatus == -1"
+                      type="warning"
+                      hit
+              >未审核
               </el-tag>
             </template>
           </el-table-column>
@@ -82,18 +111,25 @@
             <template slot-scope="scope">
               <el-button
                 v-has="'product:onSale'"
-                v-if="scope.row.saleAble!=1"
+                v-if="scope.row.saleAble!=1 && scope.row.saleAble != -1 && scope.row.approveStatus == 1"
                 size="mini"
                 type="success"
                 @click="handleModifyStatus(scope.row,1)"
               >{{ $t('table.onSale') }}
               </el-button>
               <el-button
-                v-if="scope.row.saleAble!=0"
+                v-if="scope.row.saleAble!=0  && scope.row.saleAble != -1"
                 v-has="'product:offSale'"
                 size="mini"
                 @click="handleModifyStatus(scope.row,0)"
               >{{ $t('table.offSale') }}
+              </el-button>
+              <el-button
+                v-if="scope.row.approveStatus == -1 && scope.row.saleAble != -1"
+                v-has="'product:offSale'"
+                size="mini"
+                @click="examineProduct(scope.row)"
+              >{{ $t('table.examine') }}
               </el-button>
               <el-button
                 v-has="'user:edit'"
@@ -104,7 +140,7 @@
                 plain
               >{{ $t('table.edit') }}
               </el-button>
-              <cus-del-btn v-has="'user:delete'" @ok="handleDelete(scope.row)"/>
+              <cus-del-btn v-has="'user:delete'" @ok="handleDelete(scope.row)" v-if="scope.row.saleAble != -1"/>
             </template>
           </el-table-column>
         </el-table>
@@ -301,6 +337,10 @@
             this.submitFail(response.msg)
           }
         })
+      },
+      // 审核商品
+      examineProduct(row){
+        this.$router.push({ path: '/systemGoods/examine-goods', query: { id: row.id } })
       }
     }
   }

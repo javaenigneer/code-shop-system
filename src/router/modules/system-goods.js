@@ -45,6 +45,13 @@ const systemGoods = {
       name: '参数管理',
       meta: { title: '参数管理', icon: 'my-sysmenu', noCache: true, resources: 'category' },
       hidden: true
+    },
+    {
+      path: 'examine-goods',
+      component: () => import('@/views/system-goods/examine-goods'),
+      name: '审核商品',
+      meta: { title: '审核商品', icon: 'my-sysmenu', noCache: true, resources: 'category' },
+      hidden: true
     }
   ]
 };

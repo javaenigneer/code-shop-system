@@ -41,3 +41,12 @@ export function uploadImage(file) {
     data: file
   });
 }
+
+// 获取商品详情
+export function getProductInfoById(id) {
+  return request({
+    url: '/codeworld-goods/product/get-product-info-id',
+    method: 'get',
+    params: { id }
+  });
+}
